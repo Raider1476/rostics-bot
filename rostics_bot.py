@@ -1,5 +1,3 @@
-from flask import Flask
-from threading import Thread
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
 import logging
@@ -18,24 +16,12 @@ if not TOKEN:
 else:
     logger.info("Токен успешно загружен из Secrets.")
 
-# Создаем Flask приложение
-app = Flask(__name__)
-
-# Маршрут для главной страницы
-@app.route('/')
-def home():
-    return "Бот активен!"
-
-# Функция для запуска Flask сервера
-def run_flask():
-    logger.info("Flask сервер запускается...")
-    port = int(os.environ.get("PORT", 5000))  # Используем порт из переменной окружения
-    app.run(host='0.0.0.0', port=port)  # Привязываем к 0.0.0.0
-
-# Запуск Flask сервера в отдельном потоке
-def keep_alive():
-    t = Thread(target=run_flask)
-    t.start()
+# Получаем URL для веб-хука
+WEBHOOK_URL = os.environ.get("WEBHOOK_URL")
+if not WEBHOOK_URL:
+    raise ValueError("URL для веб-хука не найден в Secrets!")
+else:
+    logger.info("URL для веб-хука успешно загружен из Secrets.")
 
 # Приветственное сообщение
 async def start(update: Update, context: CallbackContext):
@@ -311,10 +297,8 @@ async def show_main_menu(update: Update):
     await update.message.reply_text("Выбери дальнейшее действие:", reply_markup=reply_markup)
 
 # Основная функция для запуска бота
-def main():
+async def main():
     logger.info("Бот запускается...")
-    # Запускаем Flask сервер
-    keep_alive()
 
     # Создаем приложение для бота
     application = Application.builder().token(TOKEN).build()
@@ -327,9 +311,13 @@ def main():
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     logger.info("Обработчик текстовых сообщений зарегистрирован.")
 
+    # Настраиваем веб-хук
+    await application.bot.set_webhook(WEBHOOK_URL)
+    logger.info(f"Веб-хук установлен на {WEBHOOK_URL}")
+
     # Запускаем бота
-    logger.info("Бот запущен и ожидает сообщений...")
-    application.run_polling()
+    logger.info("Бот запущен и ожидает сообщений через веб-хук...")
 
 if __name__ == "__main__":
-    main()
+    import asyncio
+    asyncio.run(main())
