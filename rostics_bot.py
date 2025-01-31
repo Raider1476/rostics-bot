@@ -1,14 +1,41 @@
+from flask import Flask
+from threading import Thread
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
 import logging
 import os
 
 # Логирование
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+)
 logger = logging.getLogger(__name__)
 
-# Токен вашего бота
-TOKEN = "7970857412:AAFxfIcImroz0mYphyetH4Wo9Mijl0zeJog"
+# Получаем токен из Secrets
+TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
+if not TOKEN:
+    raise ValueError("Токен бота не найден в Secrets!")
+else:
+    logger.info("Токен успешно загружен из Secrets.")
+
+# Создаем Flask приложение
+app = Flask(__name__)
+
+# Маршрут для главной страницы
+@app.route('/')
+def home():
+    return "Бот активен!"
+
+# Функция для запуска Flask сервера
+def run_flask():
+    logger.info("Flask сервер запускается...")
+    port = int(os.environ.get("PORT", 5000))  # Используем порт из переменной окружения
+    app.run(host='0.0.0.0', port=port)  # Привязываем к 0.0.0.0
+
+# Запуск Flask сервера в отдельном потоке
+def keep_alive():
+    t = Thread(target=run_flask)
+    t.start()
 
 # Приветственное сообщение
 async def start(update: Update, context: CallbackContext):
@@ -20,6 +47,7 @@ async def start(update: Update, context: CallbackContext):
 
 # Обработка выбора станции и подраздела
 async def handle_message(update: Update, context: CallbackContext):
+    logger.info(f"Получено сообщение: {update.message.text}")
     text = update.message.text
     if text in ["1. Касса", "2. Сервис", "3. Кухня", "4. Мойка", "5. Мытье рук и химия"]:
         if text == "1. Касса":
@@ -75,7 +103,7 @@ async def handle_message(update: Update, context: CallbackContext):
         await send_sostav_info(update)
     elif text == "3. Фритюр":
         await send_fryer_info(update)
-    elif text == "1. Сроки годности":  # Добавлен обработчик для "1. Сроки годности"
+    elif text == "1. Сроки годности":
         await send_sroki_godnosti_kassa_info(update)
     elif text == "Приготовление замеса":
         await send_zames_info(update)
@@ -284,15 +312,23 @@ async def show_main_menu(update: Update):
 
 # Основная функция для запуска бота
 def main():
+    logger.info("Бот запускается...")
+    # Запускаем Flask сервер
+    keep_alive()
+
+    # Создаем приложение для бота
     application = Application.builder().token(TOKEN).build()
 
     # Регистрируем обработчики команд
     application.add_handler(CommandHandler("start", start))
+    logger.info("Обработчик команды /start зарегистрирован.")
 
     # Регистрируем обработчики сообщений
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    logger.info("Обработчик текстовых сообщений зарегистрирован.")
 
     # Запускаем бота
+    logger.info("Бот запущен и ожидает сообщений...")
     application.run_polling()
 
 if __name__ == "__main__":
