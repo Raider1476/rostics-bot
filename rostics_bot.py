@@ -312,8 +312,14 @@ async def main():
     await application.bot.set_webhook(WEBHOOK_URL)
     logger.info(f"Веб-хук установлен на {WEBHOOK_URL}")
 
-    # Запускаем бота
-    logger.info("Бот запущен и ожидает сообщений через веб-хук...")
+    # Запускаем сервер на порту, указанном в переменной окружения PORT
+    port = int(os.environ.get("PORT", 10000))  # По умолчанию 10000, если PORT не указан
+    await application.run_webhook(
+        listen="0.0.0.0",  # Слушаем все интерфейсы
+        port=port,         # Порт из переменной окружения
+        url_path=TOKEN,    # Путь для вебхука (обычно токен бота)
+        webhook_url=WEBHOOK_URL  # Полный URL вебхука
+    )
 
 if __name__ == "__main__":
     import asyncio
