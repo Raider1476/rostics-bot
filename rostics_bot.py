@@ -16,7 +16,7 @@ if not TOKEN:
     raise ValueError("Токен бота не найден в переменных окружения!")
 
 # Получаем URL для веб-хука из переменных окружения
-WEBHOOK_URL = os.environ.get("WEBHOOK_URL")
+WEBHOOK_URL = os.environ.get("WEBHOOK_URL", "https://rostics-bot.onrender.com")
 if not WEBHOOK_URL:
     raise ValueError("URL для веб-хука не найден в переменных окружения!")
 
