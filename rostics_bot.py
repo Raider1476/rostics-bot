@@ -324,14 +324,8 @@ async def main():
 
 if __name__ == "__main__":
     try:
-        # Проверяем, запущен ли уже цикл событий
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            # Если цикл уже запущен, используем create_task
-            loop.create_task(main())
-        else:
-            # Если цикл не запущен, используем run_until_complete
-            loop.run_until_complete(main())
+        # Используем asyncio.run для запуска асинхронного кода
+        asyncio.run(main())
     except Exception as e:
         logger.error(f"Ошибка при запуске бота: {e}")
         logger.error(traceback.format_exc())
