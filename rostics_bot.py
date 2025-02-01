@@ -320,7 +320,6 @@ async def main():
         url_path=TOKEN,    # Путь для вебхука (обычно токен бота)
         webhook_url=WEBHOOK_URL  # Полный URL вебхука
     )
-
 if __name__ == "__main__":
     # Проверяем, запущен ли уже цикл событий
     try:
@@ -329,11 +328,14 @@ if __name__ == "__main__":
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
 
-    # Если цикл событий уже запущен, используем create_task
-    if loop.is_running():
-        loop.create_task(main())
-    else:
-        # Если цикл событий не запущен, используем run_until_complete
-        loop.run_until_complete(main())
+    try:
+        # Если цикл событий уже запущен, используем create_task
+        if loop.is_running():
+            loop.create_task(main())
         else:
-            raise e
+            # Если цикл событий не запущен, используем run_until_complete
+            loop.run_until_complete(main())
+    except Exception as e:
+        # Ловим исключение и выводим его
+        logger.error(f"Ошибка при запуске бота: {e}")
+        raise e  # Повторно вызываем исключение, если нужно
