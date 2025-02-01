@@ -2,6 +2,7 @@ from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
 import logging
 import os
+import asyncio
 
 # Логирование
 logging.basicConfig(
@@ -9,19 +10,15 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Получаем токен из Secrets
+# Получаем токен из переменных окружения
 TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 if not TOKEN:
-    raise ValueError("Токен бота не найден в Secrets!")
-else:
-    logger.info("Токен успешно загружен из Secrets.")
+    raise ValueError("Токен бота не найден в переменных окружения!")
 
-# Получаем URL для веб-хука
+# Получаем URL для веб-хука из переменных окружения
 WEBHOOK_URL = os.environ.get("WEBHOOK_URL")
 if not WEBHOOK_URL:
-    raise ValueError("URL для веб-хука не найден в Secrets!")
-else:
-    logger.info("URL для веб-хука успешно загружен из Secrets.")
+    raise ValueError("URL для веб-хука не найден в переменных окружения!")
 
 # Приветственное сообщение
 async def start(update: Update, context: CallbackContext):
