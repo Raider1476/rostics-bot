@@ -323,22 +323,15 @@ async def main():
     )
 
 if __name__ == "__main__":
-    # Проверяем, запущен ли уже цикл событий
     try:
+        # Проверяем, запущен ли уже цикл событий
         loop = asyncio.get_event_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
-    try:
-        # Если цикл событий уже запущен, используем create_task
         if loop.is_running():
+            # Если цикл уже запущен, используем create_task
             loop.create_task(main())
         else:
-            # Если цикл событий не запущен, используем run_until_complete
+            # Если цикл не запущен, используем run_until_complete
             loop.run_until_complete(main())
     except Exception as e:
-        # Ловим исключение и выводим его
         logger.error(f"Ошибка при запуске бота: {e}")
-        logger.error(traceback.format_exc())  # Выводим стек вызовов
-        # raise e  # Уберите эту строку, если хотите, чтобы бот продолжал работать
+        logger.error(traceback.format_exc())
