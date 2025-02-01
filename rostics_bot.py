@@ -322,5 +322,12 @@ async def main():
     )
 
 if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())
+    # Используем asyncio.run() только если цикл событий не запущен
+    try:
+        asyncio.run(main())
+    except RuntimeError as e:
+        if str(e) == "This event loop is already running":
+            # Если цикл событий уже запущен, просто запускаем main()
+            asyncio.get_event_loop().run_until_complete(main())
+        else:
+            raise e
