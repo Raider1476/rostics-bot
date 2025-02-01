@@ -1,8 +1,8 @@
+import asyncio
+import os
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
 import logging
-import os
-import asyncio
 
 # Логирование
 logging.basicConfig(
@@ -327,7 +327,7 @@ if __name__ == "__main__":
         asyncio.run(main())
     except RuntimeError as e:
         if str(e) == "This event loop is already running":
-            # Если цикл событий уже запущен, просто запускаем main()
+            # Если цикл событий уже запущен, используем его
             asyncio.get_event_loop().run_until_complete(main())
         else:
             raise e
