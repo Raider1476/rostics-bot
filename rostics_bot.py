@@ -1,8 +1,9 @@
 import asyncio
 import os
+import logging
+import traceback
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
-import logging
 
 # Логирование
 logging.basicConfig(
@@ -320,6 +321,7 @@ async def main():
         url_path=TOKEN,    # Путь для вебхука (обычно токен бота)
         webhook_url=WEBHOOK_URL  # Полный URL вебхука
     )
+
 if __name__ == "__main__":
     # Проверяем, запущен ли уже цикл событий
     try:
@@ -338,4 +340,5 @@ if __name__ == "__main__":
     except Exception as e:
         # Ловим исключение и выводим его
         logger.error(f"Ошибка при запуске бота: {e}")
-        raise e  # Повторно вызываем исключение, если нужно
+        logger.error(traceback.format_exc())  # Выводим стек вызовов
+        # raise e  # Уберите эту строку, если хотите, чтобы бот продолжал работать
